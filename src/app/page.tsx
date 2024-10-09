@@ -1,9 +1,9 @@
 'use client'
 
 import ListedExoplanet from '@/components/home/listed-exoplanet'
-import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Loader, Loader2 } from 'lucide-react'
+import { colors, labels, spectralTypes } from '@/lib/data'
+import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Loader2 } from 'lucide-react'
 import { ChangeEvent, FormEvent, useEffect, useRef, useState } from 'react'
 
 const defaultData = {
@@ -14,54 +14,85 @@ const defaultData = {
 
 export default function Home () {
   const [query, setQuery] = useState('')
-  const [data, setData] = useState<Results>(defaultData)
-  const [fetching, setFetching] = useState(false)
+  const [namesData, setNamesData] = useState<Results>(defaultData)
+  const [exoplanetData, setExoplanetData] = useState<ExoplanetQuery | null>(null)
+  const [fetchingNames, setFetchingNames] = useState(false)
+  const [fetchingExoplanet, setFetchingExoplanet] = useState(false)
   const [page, setPage] = useState(0)
-  const abortControllerRef = useRef<AbortController | null>(null)
+  const [exoplanet, setExoplanet] = useState<string | null>(null)
+  const nameControllerRef = useRef<AbortController | null>(null)
+  const exoplanetControllerRef = useRef<AbortController | null>(null)
+
   const leftStyles = {
     color: page > 0 ? 'white' : 'gray',
     cursor: page > 0 ? 'pointer' : 'auto'
   }
 
   const rightStyles = {
-    color: page < data.pages - 1 ? 'white' : 'gray',
-    cursor: page < data.pages - 1 ? 'pointer' : 'auto'
+    color: page < namesData.pages - 1 ? 'white' : 'gray',
+    cursor: page < namesData.pages - 1 ? 'pointer' : 'auto'
   }
 
   const handleChange = (ev: ChangeEvent<HTMLInputElement>) => {
     setQuery(ev.target.value)
   }
 
-  const fetchData = async () => {
-    setFetching(true)
+  const fetchNames = async () => {
+    setFetchingNames(true)
     console.log(`Fetching: ${query}`)
     abortRequest()
 
     const abortController = new AbortController()
-    abortControllerRef.current = abortController
+    nameControllerRef.current = abortController
 
     const response = await fetch(`/api/exoplanets?query=${query}&page=${page}`, {
       signal: abortController.signal
     })
 
     const data = await response.json()
-    setData(data)
+    setNamesData(data)
     console.log(`Fetched: ${query} (${data.result.length})`)
     console.log(data)
 
-    setFetching(false)
-    abortControllerRef.current = null
+    nameControllerRef.current = null
+    setFetchingNames(false)
+  }
+
+  const fetchExoplanet = async (name: string) => {
+    setFetchingExoplanet(true)
+    console.log(`Fetching: ${name}`)
+    abortRequest()
+
+    const abortController = new AbortController()
+    exoplanetControllerRef.current = abortController
+
+    const response = await fetch(`/api/exoplanet?name=${name}`, {
+      signal: abortController.signal
+    })
+
+    const data = await response.json()
+    console.log(`Fetched: ${name}`)
+    setExoplanetData(data)
+    console.log(data)
+
+    exoplanetControllerRef.current = null
+    setFetchingExoplanet(false)
   }
 
   const abortRequest = () => {
-    if (abortControllerRef.current != null) {
-      setFetching(false)
-      abortControllerRef.current.abort('Cancelled')
+    if (nameControllerRef.current != null) {
+      nameControllerRef.current.abort('Cancelled')
+      // setFetchingNames(false)
+    }
+
+    if (exoplanetControllerRef.current != null) {
+      exoplanetControllerRef.current.abort('Cancelled')
+      // setFetchingExoplanet(false)
     }
   }
 
   const handlePageChange = (newPage: number) => {
-    if (newPage < 0 || newPage > data.pages - 1) {
+    if (newPage < 0 || newPage > namesData.pages - 1) {
       return
     }
 
@@ -69,19 +100,30 @@ export default function Home () {
   }
 
   useEffect(() => {
-    if (query === '' || query == null) {
-      setData(defaultData)
+    if (query !== '' && query != null) {
+      fetchNames()
     } else {
-      fetchData()
+      setNamesData(defaultData)
     }
 
     return abortRequest
   }, [query, page])
 
+  useEffect(() => {
+    console.log(exoplanet)
+    if (exoplanet != null) {
+      fetchExoplanet(exoplanet)
+    }
+
+    return abortRequest
+  }, [exoplanet])
+
   return (
-    <main>
+    <main
+      className='flex flex-col justify-between h-[100vh]'
+    >
       <div
-        className='flex flex-col max-w-sm gap-2 m-2 p-2 rounded-lg bg-[rgba(255,255,255,0.1)]'
+        className='flex flex-col max-w-sm max-h-[50%] gap-2 p-2 bg-[rgba(255,255,255,0.1)]'
       >
         <div
           className='flex items-center gap-2'
@@ -93,9 +135,10 @@ export default function Home () {
             onChange={handleChange}
           />
           {
-            fetching ? (
+            fetchingNames ? (
               <Loader2
-                className='animate-spin'
+                strokeWidth={1.5}
+                className='animate-spin w-6 h-6'
               />
             ) : (
               <Loader2
@@ -105,15 +148,16 @@ export default function Home () {
           }
         </div>
         {
-          data.result.length > 0 && (
+          namesData.result.length > 0 && (
             <div
               className='flex flex-col gap-2 overflow-x-auto'
             >
               {
-                data.result.map((exoplanet, index) => (
+                namesData.result.map((exoplanet, index) => (
                   <ListedExoplanet
                     key={index}
                     name={exoplanet}
+                    setExoplanet={setExoplanet}
                   />
                 ))
               }
@@ -137,11 +181,11 @@ export default function Home () {
           />
           <span
             style={{
-              color: data.pages === -1 ? 'gray' : 'white'
+              color: namesData.pages === -1 ? 'gray' : 'white'
             }}
           >
             {
-              data.result.length > 0 ? `${page + 1} / ${data.pages}` : '...' 
+              namesData.result.length > 0 ? `${page + 1} / ${namesData.pages}` : '...' 
             }
           </span>
           <ChevronRight
@@ -153,10 +197,60 @@ export default function Home () {
           <ChevronsRight
             className='w-6 h-6'
             strokeWidth={1.5}
-            onClick={() => handlePageChange(data.pages - 1)}
+            onClick={() => handlePageChange(namesData.pages - 1)}
             style={rightStyles}
           />
         </div>
+      </div>
+      <div
+        className='flex flex-col max-w-sm max-h-[50%] gap-2 p-2 bg-[rgba(255,255,255,0.1)]'
+      >
+        <div
+          className='flex items-center justify-between gap-2'
+        >
+          <span>
+            Exoplanet Info
+          </span>
+          {
+            fetchingExoplanet ? (
+              <Loader2
+                strokeWidth={1.5}
+                className='animate-spin w-6 h-6'
+              />
+            ) : (
+              <Loader2
+                className='opacity-0'
+              />
+            )
+          }
+        </div>
+        {
+          exoplanetData != null && (
+            <div
+              className='flex flex-col gap-2 p-2 overflow-y-auto'
+            >
+              {
+                Object.entries(exoplanetData.result).filter(([key, value]) => value != null).map(([key, value], index) => (
+                  <div
+                    key={index}
+                    className='flex justify-between'
+                  >
+                    <span>
+                      {labels[key as keyof ExoplanetData]}:
+                    </span>
+                    <span
+                      style={{
+                        color: key === 'st_spectype' ? spectralTypes[value.charAt(0)] : 'white'
+                      }}
+                    >
+                      {value}
+                    </span>
+                  </div>
+                ))
+              }
+            </div>
+          )
+        }
       </div>
     </main>
   )
