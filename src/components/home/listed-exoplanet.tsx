@@ -1,21 +1,25 @@
 import { Button } from '@/components/ui/button'
+import Link from 'next/link'
 
 interface ListedExoplanetProps {
   name: string
-  setExoplanet: (exoplanet: string) => void
 }
 
 export default function ListedExoplanet ({
-  name,
-  setExoplanet
+  name
 }: ListedExoplanetProps) {
   return (
     <Button
       variant='outline'
       className='flex items-center justify-between'
-      onClick={() => setExoplanet(name)}
+      asChild
     >
-      {name}
+      <Link
+        href={`/exoplanet/${name}`}
+        target='_blank'
+      >
+        {name}
+      </Link>
     </Button>
   )
 }

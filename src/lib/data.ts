@@ -44,8 +44,40 @@ const spectralTypes: {
   M: '#FF4500'
 }
 
+const starsDataIndex = {
+  0: {
+    label: 'main_id',
+    name: 'Main ID',
+  },
+  1: {
+    label: 'ra',
+    name: 'RA [deg]',
+  },
+  2: {
+    label: 'dec',
+    name: 'Dec [deg]',
+  },
+  3: {
+    label: 'plx_value',
+    name: 'Parallax Value [mas]',
+  },
+  4: {
+    label: 'otype',
+    name: 'Object Type',
+  },
+  5: {
+    label: 'distance',
+    name: 'Angular Distance [deg]',
+  },
+  6: {
+    label: 'plx_diff',
+    name: 'Parallax Difference [mas]',
+  }
+}
+
 export {
   labels,
   colors,
-  spectralTypes
+  spectralTypes,
+  starsDataIndex
 }

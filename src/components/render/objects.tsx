@@ -1,47 +1,67 @@
 import { Center, OrbitControls } from '@react-three/drei'
+import { useFrame } from '@react-three/fiber'
+import { useRef } from 'react'
+import { Mesh } from 'three'
 // import { Bloom, EffectComposer } from '@react-three/postprocessing'
 
-export default function Objects () {
+interface ObjectsProps {
+  starsData: StarsQuery | null
+}
+
+export default function Objects ({
+  starsData
+}: ObjectsProps) {
+  const centerRef = useRef<Mesh>(null)
+
+  useFrame(() => {
+    if (centerRef.current != null) {
+      centerRef.current.rotation.x += 0.01
+      centerRef.current.rotation.y += 0.01
+    }
+  })
+
   return (
-    // Test
     <>
       {/* <directionalLight
         position={[0, 0, 5]}
       /> */}
-      <Center>
+      {/* <Center
+        // @ts-expect-error
+        ref={centerRef}
+      >
         <mesh
           position={[0, 0, 0]}
         >
-          <pointLight
-            color={'#fff'}
-            intensity={20}
-            position={[0, 0, 0]}
-            distance={20}
-            // decay={2}
-          />
           <sphereGeometry
-            args={[1, 32, 32]}
+            args={[1, 8, 8]}
           />
           <meshStandardMaterial
-            color={'#ff0'}
-            emissive={'#ff0'}
-            emissiveIntensity={2}
+            wireframe
           />
         </mesh>
-        <mesh
-          position={[5, 0, 0]}
-        >
-          <sphereGeometry
-            args={[0.25, 32, 32]}
-          />
-          <meshStandardMaterial
-            color={'#00f'}
-          />
-        </mesh>
-      </Center>
-      {/* <EffectComposer>
-        <Bloom intensity={1.5} luminanceThreshold={0.2} luminanceSmoothing={0.9} />
-      </EffectComposer> */}
+      </Center> */}
+      {/* <ambientLight
+        intensity={0.1}
+      /> */}
+      {
+        starsData != null && (
+          starsData.result.map((star, index) => (
+            <mesh
+              key={index}
+              position={[star.x, star.y, star.z]}
+            >
+              <sphereGeometry
+                args={[0.1, 8, 8]}
+              />
+              <meshStandardMaterial
+                color='white'
+                emissive='white'
+                emissiveIntensity={5}
+              />
+            </mesh>
+          ))
+        )
+      }
       <OrbitControls />
     </>
   )
