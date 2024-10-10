@@ -1,10 +1,14 @@
 'use client'
 
-import ListedExoplanet from '@/components/home/listed-exoplanet'
-import { Input } from '@/components/ui/input'
-import { colors, labels, spectralTypes } from '@/lib/data'
-import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Loader2 } from 'lucide-react'
 import { ChangeEvent, FormEvent, useEffect, useRef, useState } from 'react'
+import { Canvas } from '@react-three/fiber'
+import Arrows from '@/components/home/arrows'
+import ListedExoplanet from '@/components/home/listed-exoplanet'
+import ListedExoplanetData from '@/components/home/listed-exoplanet-data'
+import Loader from '@/components/home/loader'
+import Objects from '@/components/render/objects'
+import { Input } from '@/components/ui/input'
+import { labels, spectralTypes } from '@/lib/data'
 
 const defaultData = {
   result: [],
@@ -120,10 +124,15 @@ export default function Home () {
 
   return (
     <main
-      className='flex flex-col justify-between h-[100vh]'
+      className='h-[100vh]'
     >
+      <Canvas
+        className='h-full w-full'
+      >
+        <Objects />
+      </Canvas>
       <div
-        className='flex flex-col max-w-sm max-h-[50%] gap-2 p-2 bg-[rgba(255,255,255,0.1)]'
+        className='absolute top-0 flex flex-col w-1/4 max-h-[50%] gap-2 p-2 bg-[rgba(255,255,255,0.1)] rounded-br-lg'
       >
         <div
           className='flex items-center gap-2'
@@ -134,18 +143,9 @@ export default function Home () {
             className='transition duration-50'
             onChange={handleChange}
           />
-          {
-            fetchingNames ? (
-              <Loader2
-                strokeWidth={1.5}
-                className='animate-spin w-6 h-6'
-              />
-            ) : (
-              <Loader2
-                className='opacity-0'
-              />
-            )
-          }
+          <Loader
+            isVisible={fetchingNames}
+          />
         </div>
         {
           namesData.result.length > 0 && (
@@ -167,17 +167,11 @@ export default function Home () {
         <div
           className='flex items-center gap-1'
         >
-          <ChevronsLeft
-            className='w-6 h-6'
-            strokeWidth={1.5}
-            onClick={() => handlePageChange(0)}
-            style={leftStyles}
-          />
-          <ChevronLeft
-            className='w-6 h-6'
-            strokeWidth={1.5}
+          <Arrows
+            direction={true}
             onClick={() => handlePageChange(page - 1)}
-            style={leftStyles}
+            onClickLimit={() => handlePageChange(0)}
+            styles={leftStyles}
           />
           <span
             style={{
@@ -185,25 +179,19 @@ export default function Home () {
             }}
           >
             {
-              namesData.result.length > 0 ? `${page + 1} / ${namesData.pages}` : '...' 
+              namesData.result.length > 0 ? `${page + 1} / ${namesData.pages}` : '...'
             }
           </span>
-          <ChevronRight
-            className='w-6 h-6'
-            strokeWidth={1.5}
+          <Arrows
+            direction={false}
             onClick={() => handlePageChange(page + 1)}
-            style={rightStyles}
-          />
-          <ChevronsRight
-            className='w-6 h-6'
-            strokeWidth={1.5}
-            onClick={() => handlePageChange(namesData.pages - 1)}
-            style={rightStyles}
+            onClickLimit={() => handlePageChange(namesData.pages - 1)}
+            styles={rightStyles}
           />
         </div>
       </div>
       <div
-        className='flex flex-col max-w-sm max-h-[50%] gap-2 p-2 bg-[rgba(255,255,255,0.1)]'
+        className='absolute bottom-0 flex flex-col w-1/4 max-h-[50%] gap-2 p-2 bg-[rgba(255,255,255,0.1)] rounded-tr-lg'
       >
         <div
           className='flex items-center justify-between gap-2'
@@ -211,18 +199,9 @@ export default function Home () {
           <span>
             Exoplanet Info
           </span>
-          {
-            fetchingExoplanet ? (
-              <Loader2
-                strokeWidth={1.5}
-                className='animate-spin w-6 h-6'
-              />
-            ) : (
-              <Loader2
-                className='opacity-0'
-              />
-            )
-          }
+          <Loader
+            isVisible={fetchingExoplanet}
+          />
         </div>
         {
           exoplanetData != null && (
@@ -231,21 +210,12 @@ export default function Home () {
             >
               {
                 Object.entries(exoplanetData.result).filter(([key, value]) => value != null).map(([key, value], index) => (
-                  <div
+                  <ListedExoplanetData
                     key={index}
-                    className='flex justify-between'
-                  >
-                    <span>
-                      {labels[key as keyof ExoplanetData]}:
-                    </span>
-                    <span
-                      style={{
-                        color: key === 'st_spectype' ? spectralTypes[value.charAt(0)] : 'white'
-                      }}
-                    >
-                      {value}
-                    </span>
-                  </div>
+                    name={labels[key as keyof ExoplanetData]}
+                    value={value}
+                    color={key === 'st_spectype' ? spectralTypes[value.charAt(0)] : 'white'}
+                  />
                 ))
               }
             </div>
