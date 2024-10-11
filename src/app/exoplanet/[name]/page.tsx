@@ -62,7 +62,7 @@ export default function ExoplanetPage ({
     const abortController = new AbortController()
     starsControllerRef.current = abortController
 
-    const response = await fetch(`/api/stars?RA=${exoplanetData.result.ra}&DEC=${exoplanetData.result.dec}&PARSECS=${exoplanetData.result.sy_dist}&SR=90&MAXREC=4000`, {
+    const response = await fetch(`/api/stars?RA=${exoplanetData.result.ra}&DEC=${exoplanetData.result.dec}&PARSECS=${exoplanetData.result.sy_dist}&SR=45&MAXREC=1000`, {
       signal: abortController.signal
     })
 
@@ -108,13 +108,27 @@ export default function ExoplanetPage ({
     <main
       className='h-[100vh]'
     >
-      <Canvas
-        className='w-full h-full'
-      >
-        <Objects
-          starsData={starsData}
-        />
-      </Canvas>
+      {
+        starsData == null ? (
+          <div
+            className='flex flex-col items-center justify-center w-full h-full'
+          >
+            <Loader2
+              strokeWidth={1.5}
+              className='animate-spin w-12 h-12'
+            />
+            Fetching Stars...
+          </div>
+        ) : (
+          <Canvas
+            className='w-full h-full'
+          >
+            <Objects
+              starsData={starsData}
+            />
+          </Canvas>
+        )
+      }
       <div
         className='absolute bottom-0 flex flex-col w-1/4 max-h-[50%] gap-2 p-2 bg-[rgba(255,255,255,0.1)] rounded-tr-lg'
       >

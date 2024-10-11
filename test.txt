@@ -1,0 +1,17 @@
+SELECT TOP ${max}
+  main_id,
+  ra,
+  dec,
+  plx_value,
+  otype,
+  DISTANCE(POINT('ICRS', ${ra}, ${dec}), POINT('ICRS', ra, dec)) AS "distance",
+  ABS(plx_value - ${exoplanetParallax}) as "plx_diff"
+FROM
+  basic
+WHERE
+  CONTAINS(POINT('ICRS', ra, dec), BOX('ICRS', ${ra}, ${dec}, ${rad}, ${rad})) = 1
+  AND otype != 'pl' AND plx_value IS NOT NULL
+ORDER BY
+  "distance" ASC
+
+const simbadTapUrl = `https://simbad.u-strasbg.fr/simbad/sim-tap/sync?request=doQuery&lang=adql&query=${encodedQuery}&format=json`
