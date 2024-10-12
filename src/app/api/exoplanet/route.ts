@@ -31,12 +31,13 @@ export async function GET (Request: Request) {
     })
   }
 
-  const query = `SELECT ${labels.join(',')} FROM ps WHERE pl_name='${name}' AND default_flag=1`
+  const query = `SELECT ${labels.join(',')} FROM ps WHERE hostname='${name}' AND default_flag=1`
   const res = await fetch(
     `https://exoplanetarchive.ipac.caltech.edu/TAP/sync?query=${query}&format=json`
   )
 
   const data = await res.json()
+  console.log(data)
   return Response.json({
     result: data[0]
   })
