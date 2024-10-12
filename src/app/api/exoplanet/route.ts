@@ -39,6 +39,7 @@ export async function GET (Request: Request) {
   const data = await res.json()
   console.log(data)
   return Response.json({
+    // Could have more than 1 exoplanet, remove [0]
     result: data[0]
   })
 }
