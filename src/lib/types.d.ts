@@ -5,7 +5,7 @@ interface Results {
 }
 
 interface ExoplanetQuery {
-  result: ExoplanetData
+  result: ExoplanetData[]
 }
 
 interface ExoplanetData {
@@ -29,6 +29,7 @@ interface ExoplanetData {
   pl_orbeccenerr2: number
   pl_orbeccenlim: number
   pl_eqt?: number
+  pl_orbincl?: number
   pl_eqterr1?: number
   pl_eqterr2: number
   pl_eqtlim: number
@@ -41,6 +42,8 @@ interface ExoplanetData {
   st_raderr1: number
   st_raderr2: number
   st_radlim: number
+  st_age?: number
+  st_vsin?: number
   rastr: string
   ra: number
   decstr: string

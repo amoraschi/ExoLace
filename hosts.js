@@ -4,11 +4,11 @@ const file = readFileSync('exoplanets.csv', 'utf8')
 
 const lines = file.split('\n')
 
-const hosts = []
+const hosts = new Set()
 for (const line of lines.slice(1)) {
   const [,host] = line.split(',')
   console.log(host)
-  hosts.push(host)
+  hosts.add(host)
 }
 
-writeFileSync('hosts.json', JSON.stringify(hosts, null, 2))
+writeFileSync('hosts.json', JSON.stringify([...hosts], null, 2))

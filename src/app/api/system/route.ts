@@ -1,3 +1,5 @@
+import { writeFileSync } from 'fs'
+
 const labels = [
   'pl_name',
   'hostname',
@@ -10,9 +12,12 @@ const labels = [
   'pl_orbsmax',
   'pl_orbeccen',
   'pl_eqt',
+  'pl_orbincl',
   'st_spectype',
   'st_teff',
   'st_rad',
+  'st_age',
+  'st_vsin',
   'rastr',
   'ra',
   'decstr',
@@ -31,7 +36,7 @@ export async function GET (Request: Request) {
     })
   }
 
-  const query = `SELECT ${labels.join(',')} FROM ps WHERE hostname='${name}' AND default_flag=1`
+  const query = `SELECT ${labels.join(',')} FROM pscomppars WHERE hostname='${name}'`
   const res = await fetch(
     `https://exoplanetarchive.ipac.caltech.edu/TAP/sync?query=${query}&format=json`
   )
@@ -39,7 +44,6 @@ export async function GET (Request: Request) {
   const data = await res.json()
   console.log(data)
   return Response.json({
-    // Could have more than 1 exoplanet, remove [0]
-    result: data[0]
+    result: data
   })
 }

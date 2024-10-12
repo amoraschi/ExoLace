@@ -5,12 +5,13 @@ import { Mesh } from 'three'
 // import { Bloom, EffectComposer } from '@react-three/postprocessing'
 
 interface ObjectsProps {
-  exoplanetData: ExoplanetData
+  exoplanetData: ExoplanetData[]
 }
 
 interface OrbitLineProps {
   majorAxis: number
   minorAxis: number
+  radInclination: number
   name: string
 }
 
@@ -19,17 +20,15 @@ const lineSegments = 100
 const defaultValue = {
   pl_orbsmax: 100,
   pl_orbeccen: 0,
-  st_rad: 5
+  st_rad: 5,
+  pl_orbincl: 0
 }
 
 export default function Objects ({
   exoplanetData
 }: ObjectsProps) {
   console.log(exoplanetData)
-
-  const notNullMajorAxis = exoplanetData.pl_orbsmax ?? defaultValue.pl_orbsmax
-  const notNullEccentricity = exoplanetData.pl_orbeccen ?? defaultValue.pl_orbeccen
-  const notNullSolarRadius = exoplanetData.st_rad ?? defaultValue.st_rad
+  const notNullSolarRadius = exoplanetData[0].st_rad ?? defaultValue.st_rad
 
   const solarRadiusInMeters = 6.957e8
   const auInMeters = 1.496e11
@@ -38,10 +37,22 @@ export default function Objects ({
 
   const scaledStarRadius = notNullSolarRadius * solarRadiusInMeters * scaleFactor
 
-  const scaledSemiMajorAxis = notNullMajorAxis * auInMeters * scaleFactor
-  const scaledSemiMinorAxis = scaledSemiMajorAxis * Math.sqrt(1 - notNullEccentricity * notNullEccentricity)
+  const calculateExoplanet = (exoplanet: ExoplanetData) => {
+    const notNullMajorAxis = exoplanet.pl_orbsmax ?? defaultValue.pl_orbsmax
+    const notNullEccentricity = exoplanet.pl_orbeccen ?? defaultValue.pl_orbeccen
+    const notNullInclination = exoplanet.pl_orbincl ?? defaultValue.pl_orbincl
 
-  console.log(scaledStarRadius, scaledSemiMajorAxis, scaledSemiMinorAxis)
+    const radInclination = notNullInclination * Math.PI / 180
+
+    const scaledSemiMajorAxis = notNullMajorAxis * auInMeters * scaleFactor
+    const scaledSemiMinorAxis = scaledSemiMajorAxis * Math.sqrt(1 - notNullEccentricity * notNullEccentricity)
+
+    return {
+      scaledSemiMajorAxis,
+      scaledSemiMinorAxis,
+      radInclination
+    }
+  }
 
   return (
     <>
@@ -52,23 +63,39 @@ export default function Objects ({
         distance={1000}
         decay={0}
       />
-      <mesh
-        position={[0, 0, 0]}
-      >
-        <sphereGeometry
-          args={[scaledStarRadius, 32, 32]}
-        />
-        <meshStandardMaterial
-          color='white'
-          emissive='white'
-          emissiveIntensity={1}
-        />
-      </mesh>
-      <OrbitLine
-        majorAxis={scaledSemiMajorAxis}
-        minorAxis={scaledSemiMinorAxis}
-        name={exoplanetData.pl_name}
-      />
+      {
+        exoplanetData.map((exoplanet, index) => {
+          const {
+            scaledSemiMajorAxis,
+            scaledSemiMinorAxis,
+            radInclination
+          } = calculateExoplanet(exoplanet)
+
+          return (
+            // <>
+              <mesh
+                key={index}
+                position={[0, 0, 0]}
+              >
+                <sphereGeometry
+                  args={[scaledStarRadius, 32, 32]}
+                />
+                <meshStandardMaterial
+                  color='white'
+                  emissive='white'
+                  emissiveIntensity={1}
+                />
+                <OrbitLine
+                  majorAxis={scaledSemiMajorAxis}
+                  minorAxis={scaledSemiMinorAxis}
+                  radInclination={radInclination}
+                  name={exoplanet.pl_name}
+                />
+              </mesh>
+            // </>
+          )
+        })
+      }
       <OrbitControls
         minDistance={50}
         maxDistance={500}
@@ -80,18 +107,23 @@ export default function Objects ({
 function OrbitLine ({
   majorAxis,
   minorAxis,
+  radInclination,
   name
 }: OrbitLineProps) {
   const points: [number, number, number][] = []
   const focalDistance = Math.sqrt(majorAxis * majorAxis - minorAxis * minorAxis)
 
+  console.log(majorAxis, minorAxis, radInclination)
   for (let i = 0; i < lineSegments; i++) {
-    const angle = Math.PI * 2 * (i / lineSegments)
+    const t = (i / lineSegments) * 2 * Math.PI; // Parameter from 0 to 2pi
+    const x = majorAxis * Math.cos(t) - focalDistance
+    const y = minorAxis * Math.sin(t);
 
-    const x = Math.cos(angle) * majorAxis
-    const z = Math.sin(angle) * minorAxis
+    // Apply rotation for inclination (in radians)
+    const z = y * Math.sin(radInclination - Math.PI / 2); // Z component after inclination
+    const yInclined = y * Math.cos(radInclination - Math.PI / 2); // Adjusted Y component
 
-    points.push([x - focalDistance, 0, z])
+    points.push([x, yInclined, z])
   }
 
   const startPoint = points[0]
@@ -102,14 +134,13 @@ function OrbitLine ({
       <Line
         points={points}
         color='white'
-        dashed
       />
       <Text
-        position={[startPoint[0], 2, startPoint[2]]}
+        position={[startPoint[0], 2.5, startPoint[2]]}
         color='white'
         anchorX='center'
         anchorY='middle'
-        fontSize={2}
+        fontSize={5}
         rotation={[0, Math.PI / 2, 0]}
       >
         {name}

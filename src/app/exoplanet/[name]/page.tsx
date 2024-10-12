@@ -20,7 +20,6 @@ export default function ExoplanetPage ({
   const [fetchingExoplanet, setFetchingExoplanet] = useState(false)
   const [infoExpanded, setInfoExpanded] = useState(true)
   const exoplanetControllerRef = useRef<AbortController | null>(null)
-  const starsControllerRef = useRef<AbortController | null>(null)
 
   const exoplanet = decodeURIComponent(params.name)
 
@@ -32,7 +31,7 @@ export default function ExoplanetPage ({
     const abortController = new AbortController()
     exoplanetControllerRef.current = abortController
 
-    const response = await fetch(`/api/exoplanet?name=${name}`, {
+    const response = await fetch(`/api/system?name=${name}`, {
       signal: abortController.signal
     })
 
@@ -49,11 +48,6 @@ export default function ExoplanetPage ({
     if (exoplanetControllerRef.current != null) {
       exoplanetControllerRef.current.abort('Cancelled')
       // setFetchingExoplanet(false)
-    }
-
-    if (starsControllerRef.current != null) {
-      starsControllerRef.current.abort('Cancelled')
-      // setFetchingStars
     }
   }
 
@@ -91,7 +85,7 @@ export default function ExoplanetPage ({
           </Canvas>
         )
       }
-      <div
+      {/* <div
         className='absolute bottom-0 flex flex-col w-1/4 max-h-[50%] gap-2 p-2 bg-[rgba(255,255,255,0.1)] rounded-tr-lg'
       >
         <div
@@ -127,19 +121,20 @@ export default function ExoplanetPage ({
               className='flex flex-col gap-2 p-2 overflow-y-auto'
             >
               {
-                Object.entries(exoplanetData.result).map(([key, value], index) => (
+                Object.keys(exoplanetData.result).map((key, index) => (
                   <ListedExoplanetData
                     key={index}
                     name={labels[key]}
-                    value={value}
-                    color={key === 'st_spectype' ? spectralTypes[value.charAt(0)] : 'white'}
+                    value={exoplanetData.result[key as keyof ExoplanetData]}
+                    // color={key === 'st_spectype' ? spectralTypes[exoplanetData.result[key as keyof ExoplanetData].charAt(0)] : 'white'}
+                    color='white'
                   />
                 ))
               }
             </div>
           )
         }
-      </div>
+      </div> */}
     </main>
   )
 }

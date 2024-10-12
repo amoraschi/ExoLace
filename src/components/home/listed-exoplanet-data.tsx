@@ -1,6 +1,6 @@
 interface ListedExoplanetDataProps {
   name: string
-  value: string
+  value: string | number | undefined
   color: string
 }
 
