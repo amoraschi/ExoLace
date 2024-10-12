@@ -18,10 +18,10 @@ export default function ListedExoplanetData ({
       </span>
       <span
         style={{
-          color
+          color: value == null ? 'red' : color
         }}
       >
-        {value}
+        {value ?? 'N/A'}
       </span>
     </div>
   )

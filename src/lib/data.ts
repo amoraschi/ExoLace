@@ -1,4 +1,6 @@
-const labels = {
+const labels: {
+  [key: string]: string
+} = {
   'pl_name': 'Planet Name',
   'hostname': 'Host Name',
   'default_flag': 'Default Parameter Set',

@@ -1,6 +1,7 @@
 'use client'
 
 import ListedExoplanetData from '@/components/home/listed-exoplanet-data'
+import Objects from '@/components/render/objects'
 import { labels, spectralTypes } from '@/lib/data'
 import { Canvas } from '@react-three/fiber'
 import { Loader2, Minus, Plus } from 'lucide-react'
@@ -84,7 +85,9 @@ export default function ExoplanetPage ({
           <Canvas
             className='w-full h-full'
           >
-            <ambientLight />
+            <Objects
+              exoplanetData={exoplanetData.result}
+            />
           </Canvas>
         )
       }
@@ -124,10 +127,10 @@ export default function ExoplanetPage ({
               className='flex flex-col gap-2 p-2 overflow-y-auto'
             >
               {
-                Object.entries(exoplanetData.result).filter(([key, value]) => value != null).map(([key, value], index) => (
+                Object.entries(exoplanetData.result).map(([key, value], index) => (
                   <ListedExoplanetData
                     key={index}
-                    name={labels[key as keyof ExoplanetData]}
+                    name={labels[key]}
                     value={value}
                     color={key === 'st_spectype' ? spectralTypes[value.charAt(0)] : 'white'}
                   />
