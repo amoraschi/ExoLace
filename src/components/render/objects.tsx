@@ -1,4 +1,4 @@
-import { Center, Line, OrbitControls, Text } from '@react-three/drei'
+import { Center, Line, OrbitControls, Stars, Text } from '@react-three/drei'
 import { useFrame } from '@react-three/fiber'
 import { useRef } from 'react'
 import { Mesh } from 'three'
@@ -99,6 +99,14 @@ export default function Objects ({
       <OrbitControls
         minDistance={50}
         maxDistance={500}
+      />
+      <Stars
+        radius={300}
+        depth={100}
+        count={5000}
+        factor={20}
+        saturation={0}
+        fade
       />
     </>
   )
