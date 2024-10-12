@@ -30,20 +30,3 @@ interface ExoplanetData {
   sy_dist: number
   sy_vmag: number
 }
-
-interface StarsQuery {
-  result: StarData[]
-}
-
-interface StarData {
-  main_id: string
-  ra: number
-  dec: number
-  plx_value: number
-  otype: string
-  distance: number
-  plx_diff: number
-  x: number
-  y: number
-  z: number
-}
