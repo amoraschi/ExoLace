@@ -1,7 +1,8 @@
+import { getStarColor } from '@/lib/data'
 import { Center, Line, OrbitControls, Stars, Text } from '@react-three/drei'
 import { useFrame } from '@react-three/fiber'
 import { useRef } from 'react'
-import { Mesh } from 'three'
+import { BufferGeometry, Float32BufferAttribute, Mesh, Vector3 } from 'three'
 // import { Bloom, EffectComposer } from '@react-three/postprocessing'
 
 interface ObjectsProps {
@@ -29,12 +30,12 @@ export default function Objects ({
 }: ObjectsProps) {
   console.log(exoplanetData)
   const notNullSolarRadius = exoplanetData[0].st_rad ?? defaultValue.st_rad
+  const starColor = getStarColor(exoplanetData[0].st_spectype, exoplanetData[0].st_teff)
 
   const solarRadiusInMeters = 6.957e8
   const auInMeters = 1.496e11
 
   const scaleFactor = starScreenSize / (notNullSolarRadius * solarRadiusInMeters)
-
   const scaledStarRadius = notNullSolarRadius * solarRadiusInMeters * scaleFactor
 
   const calculateExoplanet = (exoplanet: ExoplanetData) => {
@@ -54,15 +55,29 @@ export default function Objects ({
     }
   }
 
+  console.log(starColor)
+
   return (
     <>
       <pointLight
-        color='white'
+        color={starColor}
         // intensity={500}
         position={[0, 0, 0]}
-        distance={1000}
-        decay={0}
+        // distance={1000}
+        // decay={0}
       />
+      <mesh
+        position={[0, 0, 0]}
+      >
+        <sphereGeometry
+          args={[scaledStarRadius, 32, 32]}
+        />
+        <meshStandardMaterial
+          color={starColor}
+          emissive={starColor}
+          emissiveIntensity={1}
+        />
+      </mesh>
       {
         exoplanetData.map((exoplanet, index) => {
           const {
@@ -72,27 +87,13 @@ export default function Objects ({
           } = calculateExoplanet(exoplanet)
 
           return (
-            // <>
-              <mesh
-                key={index}
-                position={[0, 0, 0]}
-              >
-                <sphereGeometry
-                  args={[scaledStarRadius, 32, 32]}
-                />
-                <meshStandardMaterial
-                  color='white'
-                  emissive='white'
-                  emissiveIntensity={1}
-                />
-                <OrbitLine
-                  majorAxis={scaledSemiMajorAxis}
-                  minorAxis={scaledSemiMinorAxis}
-                  radInclination={radInclination}
-                  name={exoplanet.pl_name}
-                />
-              </mesh>
-            // </>
+            <OrbitLine
+              key={index}
+              majorAxis={scaledSemiMajorAxis}
+              minorAxis={scaledSemiMinorAxis}
+              radInclination={radInclination}
+              name={exoplanet.pl_name}
+            />
           )
         })
       }
@@ -118,38 +119,63 @@ function OrbitLine ({
   radInclination,
   name
 }: OrbitLineProps) {
-  const points: [number, number, number][] = []
+  const textRef = useRef<Mesh>()
+
+  const points: Vector3[] = []
   const focalDistance = Math.sqrt(majorAxis * majorAxis - minorAxis * minorAxis)
+
+  useFrame(({ camera }) => {
+    if (textRef.current != null) {
+      textRef.current.lookAt(camera.position)
+    }
+  })
 
   console.log(majorAxis, minorAxis, radInclination)
   for (let i = 0; i < lineSegments; i++) {
-    const t = (i / lineSegments) * 2 * Math.PI; // Parameter from 0 to 2pi
+    const t = (i / lineSegments) * 2 * Math.PI
     const x = majorAxis * Math.cos(t) - focalDistance
-    const y = minorAxis * Math.sin(t);
+    const y = minorAxis * Math.sin(t)
 
-    // Apply rotation for inclination (in radians)
-    const z = y * Math.sin(radInclination - Math.PI / 2); // Z component after inclination
-    const yInclined = y * Math.cos(radInclination - Math.PI / 2); // Adjusted Y component
+    const z = y * Math.sin(radInclination - Math.PI / 2)
+    const yInclined = y * Math.cos(radInclination - Math.PI / 2)
 
-    points.push([x, yInclined, z])
+    points.push(new Vector3(x, yInclined, z))
   }
 
   const startPoint = points[0]
   points.push(startPoint)
 
+  const lineGeometry = new BufferGeometry().setFromPoints(points)
+
+  const colors = []
+  for (let i = 0; i < lineSegments; i++) {
+    const alpha = i / lineSegments
+    colors.push(1, 1, 1, alpha - 0.1)
+  }
+
+  lineGeometry.setAttribute('color', new Float32BufferAttribute(colors, 4))
+
   return (
     <>
-      <Line
-        points={points}
-        color='white'
-      />
+      <line>
+        <bufferGeometry
+          attach='geometry'
+          {...lineGeometry}
+        />
+        <lineBasicMaterial
+          attach='material'
+          vertexColors
+          transparent
+          opacity={1}
+        />
+      </line>
       <Text
-        position={[startPoint[0], 2.5, startPoint[2]]}
+        ref={textRef}
+        position={[startPoint.x, 0, startPoint.z]}
         color='white'
         anchorX='center'
         anchorY='middle'
         fontSize={5}
-        rotation={[0, Math.PI / 2, 0]}
       >
         {name}
       </Text>

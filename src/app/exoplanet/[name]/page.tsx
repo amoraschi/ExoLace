@@ -2,7 +2,8 @@
 
 import ListedExoplanetData from '@/components/home/listed-exoplanet-data'
 import Objects from '@/components/render/objects'
-import { labels, spectralTypes } from '@/lib/data'
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
+import { labels } from '@/lib/data'
 import { Canvas } from '@react-three/fiber'
 import { Loader2, Minus, Plus } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
@@ -85,56 +86,45 @@ export default function ExoplanetPage ({
           </Canvas>
         )
       }
-      {/* <div
-        className='absolute bottom-0 flex flex-col w-1/4 max-h-[50%] gap-2 p-2 bg-[rgba(255,255,255,0.1)] rounded-tr-lg'
-      >
-        <div
-          className='flex items-center justify-between gap-2'
-        >
-          Exoplanet Info
-          {
-            fetchingExoplanet ? (
-              <Loader2
-                strokeWidth={1.5}
-                className='animate-spin w-6 h-6'
-              />
-            ) : (
-              infoExpanded ? (
-                <Minus
-                  strokeWidth={1.5}
-                  className='cursor-pointer w-6 h-6'
-                  onClick={() => setInfoExpanded(false)}
-                />
-              ) : (
-                <Plus
-                  strokeWidth={1.5}
-                  className='cursor-pointer w-6 h-6'
-                  onClick={() => setInfoExpanded(true)}
-                />
-              )
-            )
-          }
-        </div>
-        {
-          exoplanetData != null && infoExpanded && (
-            <div
-              className='flex flex-col gap-2 p-2 overflow-y-auto'
-            >
-              {
-                Object.keys(exoplanetData.result).map((key, index) => (
-                  <ListedExoplanetData
-                    key={index}
-                    name={labels[key]}
-                    value={exoplanetData.result[key as keyof ExoplanetData]}
-                    // color={key === 'st_spectype' ? spectralTypes[exoplanetData.result[key as keyof ExoplanetData].charAt(0)] : 'white'}
-                    color='white'
-                  />
-                ))
-              }
-            </div>
-          )
-        }
-      </div> */}
+      {
+        exoplanetData != null && (
+          <Accordion
+            type='single'
+            collapsible
+            className='absolute bottom-0 flex flex-col w-1/4 max-h-[50%] gap-2 p-2 bg-[rgba(255,255,255,0.1)] rounded-tr-lg overflow-y-auto'
+          >
+            {
+              exoplanetData.result.map((exoplanet, index) => (
+                <AccordionItem
+                  key={index}
+                  className='p-2 bg-[rgba(255,255,255,0.1)] rounded-lg'
+                  value={exoplanet.pl_name}
+                >
+                  <AccordionTrigger
+                    className='p-0'
+                  >
+                    {exoplanet.pl_name}
+                  </AccordionTrigger>
+                  <AccordionContent
+                    className='flex flex-col gap-2 p-2 pb-0'
+                  >
+                    {
+                      Object.keys(exoplanet).map((key, index) => (
+                        <ListedExoplanetData
+                          key={index}
+                          name={labels[key]}
+                          value={exoplanet[key as keyof ExoplanetData]}
+                          color='white'
+                        />
+                      ))
+                    }
+                  </AccordionContent>
+                </AccordionItem>
+              ))
+            }
+          </Accordion>
+        )
+      }
     </main>
   )
 }

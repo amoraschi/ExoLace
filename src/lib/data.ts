@@ -1,3 +1,5 @@
+import { Color } from 'three'
+
 const labels: {
   [key: string]: string
 } = {
@@ -26,19 +28,64 @@ const labels: {
   'sy_vmag': 'V (Johnson) Magnitude'
 }
 
-const spectralTypes: {
-  [key: string]: string
+const starColors: {
+  [key: string]: {
+    color: string
+    temperatureRange: number[]
+  }
 } = {
-  O: '#1E90FF',
-  B: '#5F9EA0',
-  A: '#FFFFFF',
-  F: '#FFFFE0',
-  G: '#FFD700',
-  K: '#FFA500',
-  M: '#FF4500'
+  O: {
+    color: 'blue',
+    temperatureRange: [30000, 50000],
+  },
+  B: {
+    color: 'lightblue',
+    temperatureRange: [10000, 30000],
+  },
+  A: {
+    color: 'white',
+    temperatureRange: [7500, 10000],
+  },
+  F: {
+    color: 'lightyellow',
+    temperatureRange: [6000, 7500],
+  },
+  G: {
+    color: 'palegoldenrod',
+    temperatureRange: [5200, 6000],
+  },
+  K: {
+    color: 'orange',
+    temperatureRange: [3700, 5200],
+  },
+  M: {
+    color: 'red',
+    temperatureRange: [2400, 3700],
+  },
+}
+
+function getStarColor (spectralType?: string, temperature?: number) {
+  console.log(spectralType, temperature)
+  if (spectralType != null && starColors[spectralType.charAt(0)] != null) {
+    return starColors[spectralType.charAt(0)].color
+  }
+
+  if (temperature != null) {
+    const color = Object.entries(starColors).find(([type, { temperatureRange }]) => {
+      const [minTemp, maxTemp] = temperatureRange
+      return temperature >= minTemp && temperature <= maxTemp
+    })
+
+    if (color != null) {
+      return color[1].color
+    }
+  }
+
+  return 'white'
 }
 
 export {
   labels,
-  spectralTypes
+  starColors,
+  getStarColor
 }
