@@ -1,9 +1,8 @@
 import { getStarColor } from '@/lib/data'
-import { Center, Line, OrbitControls, Stars, Text } from '@react-three/drei'
+import { OrbitControls, Text } from '@react-three/drei'
 import { useFrame } from '@react-three/fiber'
 import { useRef, useState } from 'react'
 import { BufferGeometry, Float32BufferAttribute, Mesh, Vector3 } from 'three'
-// import { Bloom, EffectComposer } from '@react-three/postprocessing'
 
 interface ObjectsProps {
   exoplanetData: ExoplanetData[]
@@ -104,14 +103,6 @@ export default function Objects ({
         minDistance={50}
         maxDistance={maxZoom * 2}
       />
-      {/* <Stars
-        radius={300}
-        depth={100}
-        count={5000}
-        factor={20}
-        saturation={0}
-        fade
-      /> */}
     </>
   )
 }

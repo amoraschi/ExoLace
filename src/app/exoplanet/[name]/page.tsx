@@ -4,9 +4,9 @@ import ListedExoplanetData from '@/components/home/listed-exoplanet-data'
 import Objects from '@/components/render/objects'
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
 import { labels } from '@/lib/data'
-import { Environment } from '@react-three/drei'
+import { PerspectiveCamera } from '@react-three/drei'
 import { Canvas } from '@react-three/fiber'
-import { Loader2, Minus, Plus } from 'lucide-react'
+import { Loader2 } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 
 interface ExoplanetProps {
@@ -20,7 +20,6 @@ export default function ExoplanetPage ({
 }: ExoplanetProps) {
   const [exoplanetData, setExoplanetData] = useState<ExoplanetQuery | null>(null)
   const [fetchingExoplanet, setFetchingExoplanet] = useState(false)
-  const [infoExpanded, setInfoExpanded] = useState(true)
   const exoplanetControllerRef = useRef<AbortController | null>(null)
 
   const exoplanet = decodeURIComponent(params.name)
@@ -80,14 +79,11 @@ export default function ExoplanetPage ({
         ) : (
           <Canvas
             className='w-full h-full'
-            camera={{
-              far: 10000
-            }}
           >
-            <Environment
-              files='/assets/background.jpg'
-              background
-              backgroundBlurriness={0.05}
+            <PerspectiveCamera
+              makeDefault
+              position={[0, 0, 0]}
+              far={10000}
             />
             <Objects
               exoplanetData={exoplanetData.result}
