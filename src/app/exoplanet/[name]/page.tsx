@@ -4,6 +4,7 @@ import ListedExoplanetData from '@/components/home/listed-exoplanet-data'
 import Objects from '@/components/render/objects'
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
 import { labels } from '@/lib/data'
+import { Environment } from '@react-three/drei'
 import { Canvas } from '@react-three/fiber'
 import { Loader2, Minus, Plus } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
@@ -83,6 +84,11 @@ export default function ExoplanetPage ({
               far: 10000
             }}
           >
+            <Environment
+              files='/assets/background.jpg'
+              background
+              backgroundBlurriness={0.05}
+            />
             <Objects
               exoplanetData={exoplanetData.result}
             />
