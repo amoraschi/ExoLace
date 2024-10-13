@@ -79,6 +79,9 @@ export default function ExoplanetPage ({
         ) : (
           <Canvas
             className='w-full h-full'
+            camera={{
+              far: 10000
+            }}
           >
             <Objects
               exoplanetData={exoplanetData.result}

@@ -1,7 +1,7 @@
 import { getStarColor } from '@/lib/data'
 import { Center, Line, OrbitControls, Stars, Text } from '@react-three/drei'
 import { useFrame } from '@react-three/fiber'
-import { useRef } from 'react'
+import { useRef, useState } from 'react'
 import { BufferGeometry, Float32BufferAttribute, Mesh, Vector3 } from 'three'
 // import { Bloom, EffectComposer } from '@react-three/postprocessing'
 
@@ -28,6 +28,8 @@ const defaultValue = {
 export default function Objects ({
   exoplanetData
 }: ObjectsProps) {
+  const [maxZoom, setMaxZoom] = useState(500)
+
   console.log(exoplanetData)
   const notNullSolarRadius = exoplanetData[0].st_rad ?? defaultValue.st_rad
   const starColor = getStarColor(exoplanetData[0].st_spectype, exoplanetData[0].st_teff)
@@ -48,6 +50,10 @@ export default function Objects ({
     const scaledSemiMajorAxis = notNullMajorAxis * auInMeters * scaleFactor
     const scaledSemiMinorAxis = scaledSemiMajorAxis * Math.sqrt(1 - notNullEccentricity * notNullEccentricity)
 
+    if (scaledSemiMajorAxis > maxZoom) {
+      setMaxZoom(scaledSemiMajorAxis)
+    }
+
     return {
       scaledSemiMajorAxis,
       scaledSemiMinorAxis,
@@ -61,10 +67,7 @@ export default function Objects ({
     <>
       <pointLight
         color={starColor}
-        // intensity={500}
         position={[0, 0, 0]}
-        // distance={1000}
-        // decay={0}
       />
       <mesh
         position={[0, 0, 0]}
@@ -99,16 +102,16 @@ export default function Objects ({
       }
       <OrbitControls
         minDistance={50}
-        maxDistance={500}
+        maxDistance={maxZoom * 2}
       />
-      <Stars
+      {/* <Stars
         radius={300}
         depth={100}
         count={5000}
         factor={20}
         saturation={0}
         fade
-      />
+      /> */}
     </>
   )
 }
