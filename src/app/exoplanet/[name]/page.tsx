@@ -4,10 +4,11 @@ import ListedExoplanetData from '@/components/home/listed-exoplanet-data'
 import Objects from '@/components/render/objects'
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
 import { labels } from '@/lib/data'
-import { PerspectiveCamera } from '@react-three/drei'
+import { Environment, PerspectiveCamera } from '@react-three/drei'
 import { Canvas } from '@react-three/fiber'
 import { Loader2 } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
+import { Euler } from 'three'
 
 interface ExoplanetProps {
   params: {
@@ -84,6 +85,12 @@ export default function ExoplanetPage ({
               makeDefault
               position={[0, 0, 0]}
               far={10000}
+            />
+            <Environment
+              files='/assets/background.jpg'
+              background
+              backgroundIntensity={0.25}
+              backgroundRotation={new Euler(Math.PI / 4, 0, 0)}
             />
             <Objects
               exoplanetData={exoplanetData.result}

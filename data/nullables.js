@@ -5,7 +5,6 @@ const data = readFileSync('exoplanets.csv', 'utf8')
 const lines = data.split('\n')
 
 const head = lines[0].split(',')
-// Create an object where keys are the column names and values are boolean
 const headers = head.reduce((acc, header) => {
   acc[header] = ''
   return acc
